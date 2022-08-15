@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /src
+    command: pnpm start
+    volumes:
+      - ${PWD}:/src
+    ports:
+      - 3001:3000
+    environment:
+      NODE_ENV: development
+      PORT: 3000
