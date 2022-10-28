@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 
 const server = new Server({ port: process.env.PORT });
 
-const connections = [];
+let connections = [];
 
 server.on("connection", function (socket) {
   socket.send(
@@ -14,11 +14,35 @@ server.on("connection", function (socket) {
     const parsedData = JSON.parse(data);
     console.log(parsedData);
 
+    const debuggers = connections.filter(
+      (connection) => connection.relation === "debugger"
+    );
+
     switch (parsedData.type) {
       case "init":
         const { relation } = parsedData.data;
-        const id = uuidv4();
+        const id = socket._id;
+
         connections.push({ relation, id, socket });
+
+        if (relation === "client") {
+          console.log("Client connection accepted", id);
+
+          debuggers.forEach((debuggerUi) => {
+            console.log("Updating debugger of new client", id);
+            debuggerUi.socket.send(
+              JSON.stringify({
+                type: "init",
+                message: "New client connected!",
+                data: {
+                  id,
+                },
+              })
+            );
+          });
+        }
+
+        // Send the client back its id
         socket.send(
           JSON.stringify({
             type: "init",
@@ -29,22 +53,25 @@ server.on("connection", function (socket) {
         );
         break;
 
-      default:
-        const debuggerUi = connections.find(
-          (connection) => connection.relation === "debugger"
+      case "disconnect":
+        const { id: socketId } = parsedData.data;
+        connections = connections.filter(
+          (connection) => connection.id !== socketId
         );
+        break;
 
-        if (debuggerUi) {
+      default:
+        debuggers.forEach((debuggerUi) => {
           debuggerUi.socket.send(
-            JSON.stringify({ type: parsedData.type, data: parsedData.data })
+            JSON.stringify({
+              type: parsedData.type,
+              message: parsedData.message,
+              data: parsedData.data,
+            })
           );
-        }
+        });
         break;
     }
-  });
-
-  socket.on("close", function () {
-    // Find a way to delete the corresponding client object from clients
   });
 
   socket.on("error", function (error) {
