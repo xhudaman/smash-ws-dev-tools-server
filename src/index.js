@@ -29,7 +29,7 @@ server.on("connection", function (socket) {
           console.log("Client connection accepted", id);
 
           debuggers.forEach((debuggerUi) => {
-            console.log("Updating debugger of new client", id);
+            console.log("Notifying debugger of new client", id);
             debuggerUi.socket.send(
               JSON.stringify({
                 type: "init",
