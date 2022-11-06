@@ -14,8 +14,6 @@ COPY ./package.json ./pnpm-lock.yaml ./
 
 RUN pnpm i --frozen-lockfile --prod
 
-EXPOSE ${PORT}
-
 COPY ./src ./src
 
 CMD ["pnpm", "start:prod"]
