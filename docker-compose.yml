@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: base
     working_dir: /src
     command: pnpm start
     volumes:
