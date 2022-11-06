@@ -1,5 +1,4 @@
 const Server = require("simple-websocket/server");
-const { v4: uuidv4 } = require("uuid");
 
 const server = new Server({ port: process.env.PORT });
 
